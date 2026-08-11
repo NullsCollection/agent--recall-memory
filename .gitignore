@@ -1,0 +1,17 @@
+# built binary (built name is OS-dependent: memdb on Linux, memdb.exe on Windows).
+# `go install ./...` is the canonical install path (puts it on $GOPATH/bin);
+# `go build ./...` without -o drops a binary in the repo root — these patterns
+# keep that out of git. Anchored with / so they can't match a future source
+# file like somepkg/memdb_helper.go, and explicit (not /memdb*) so a future
+# top-level memdb.go wouldn't be ignored either.
+/memdb
+/memdb.exe
+/memdb_*.exe
+
+# local SQLite databases — never commit
+*.sqlite
+*.sqlite-*
+
+# your real golden set — a map of your own past decisions, keep it local.
+# The tracked template is golden.example.txt; copy it to golden.txt to start.
+/golden.txt

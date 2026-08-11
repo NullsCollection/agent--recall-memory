@@ -1,0 +1,69 @@
+# Golden queries — template. Copy to `golden.txt` and fill in with your own.
+#
+#   cp golden.example.txt golden.txt
+#   memdb eval
+#
+# `golden.txt` is gitignored on purpose: a real golden file is a map of your
+# own past decisions, which is personal and worth keeping local.
+#
+# FORMAT — one `query ||| expected-substring` per line. Blank lines and `#`
+# comments are skipped. A query HITs when a memory whose text contains the
+# expected substring (case-insensitive) appears in the top-K results.
+#
+# HOW TO BUILD A GOOD SET (this part matters more than the queries themselves):
+#
+#   1. Browse the store, don't search it. Pick the memories FIRST — reading
+#      rows out of ~/.claude/memdb.sqlite directly, or skimming your session
+#      jsonl files. If you pick targets by searching, you are only testing that
+#      search finds what search already found, and you will score ~100% while
+#      learning nothing.
+#   2. Write the query in DIFFERENT WORDS than the memory. The point is to
+#      prove the embedding understood the question, not that the query echoed
+#      the text. "why do agents keep rewriting whole files" should find a
+#      memory that never uses those words.
+#   3. Check each expected substring before trusting it. It must actually
+#      appear in an indexed row, and appear only in rows about that decision —
+#      otherwise a "hit" may be a coincidental match on an unrelated memory.
+#   4. Aim for 10–15 spanning several repos. Cross-project recall is the whole
+#      point, so don't draw them all from your current project.
+#   5. Mix the kinds of thing you actually ask about: architecture calls,
+#      debugging conclusions, tool/config recipes, naming and rationale.
+#
+# RECORD YOUR BASELINE HERE before you tune anything. Every later choice is a
+# guess without it:
+#   date:           ________
+#   top-k:          ____
+#   repo-boost:     ____
+#   short-turn:     ____
+#   query-prefix:   ____
+#   score:          __/__ hit, mean rank ____
+#   good-hit raw cosine: min ____ median ____ max ____
+#
+# THEN TUNE ONE KNOB AT A TIME, re-running eval after each:
+#   memdb eval --top-k 3            # then 5, 10
+#   memdb eval --repo-boost 1.0     # then 1.15, 1.3 — needs --cwd inside an
+#                                   # INDEXED repo, or the boost is inert
+#   memdb eval --query-prefix=      # measures without the retrieval instruction
+#   memdb index --force --short-turn 20    # then 40, 80 (re-extracts + re-embeds)
+#
+# Keep a knob only if it improves the score. Note the winning config here.
+
+# --- examples: replace every line below with your own ---
+
+# architecture / structural decisions
+how did we split the API out of the monorepo ||| git subtree split
+is this codebase organised by feature or by layer ||| horizontal-layer
+where do uploaded files get stored ||| storage.go
+
+# debugging conclusions worth not re-deriving
+why does the linter flag every file after an edit ||| eol=lf
+do I need to check anything after a sql rows loop in Go ||| rows.Err()
+the API started returning 500s in production ||| fails open
+
+# auth / security calls
+what happens when an existing account signs in with a social provider ||| email_verified
+how does a user without a password delete their account ||| account_deletion
+
+# tooling and config recipes
+how do we make the theme colour swappable without touching every file ||| @theme inline
+should the dev environment run in docker on Windows ||| bind mounts
